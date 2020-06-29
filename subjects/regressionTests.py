@@ -82,7 +82,10 @@ def cmdline_split(s):
         a.append(sub)
     return a
 
-# Remove output files
+# Remove output files.
+# This is trickier than it seems on Windows with various background services
+# locking files at inconvenient times. This can cause os.remove to sometimes
+# fail. This function tries to handle this with a small delay on failure.
 def clear_dir(dir_name, files):
     failedFiles = []
     for pname in files:
@@ -92,7 +95,9 @@ def clear_dir(dir_name, files):
                 try:
                     os.remove(filename)
                 except:
-                    failedFiles.append(filename)
+                    # Queue failed files for retries if they still exist.
+                    if os.exists(filename):
+                        failedFiles.append(filename)
     # Retry all failed files with a delay. Let the error propagate if persists.
     if failedFiles:
         time.sleep(1000)
