@@ -34,20 +34,23 @@ namespace Reko.Core
     {
         public UserData()
         {
-            this.Procedures = new SortedList<Address, UserProcedure>();
-            this.Calls = new SortedList<Address, UserCallData>();
-            this.Globals = new SortedList<Address, UserGlobal>();
-            this.Heuristics = new SortedSet<string>();
-            this.IndirectJumps = new SortedList<Address, UserIndirectJump>();
-            this.JumpTables = new SortedList<Address, ImageMapVectorTable>();
-            this.Annotations = new AnnotationList();
-            this.TextEncoding = Encoding.ASCII;
-            this.RegisterValues = new SortedList<Address, List<UserRegisterValue>>();
-            this.Segments = new List<UserSegment>();
-            this.ProcedureSourceFiles = new Dictionary<Address, string>();
-            this.Patches = new Dictionary<Address, CodePatch>();
-            this.DebugTraceProcedures = new HashSet<string>();
-            this.BlockLabels = new Dictionary<string, string>();
+            Procedures = new SortedList<Address, UserProcedure>();
+            Calls = new SortedList<Address, UserCallData>();
+            Globals = new SortedList<Address, UserGlobal>();
+            Heuristics = new SortedSet<string>();
+            IndirectJumps = new SortedList<Address, UserIndirectJump>();
+            JumpTables = new SortedList<Address, ImageMapVectorTable>();
+            Annotations = new AnnotationList();
+            TextEncoding = Encoding.ASCII;
+            RegisterValues = new SortedList<Address, List<UserRegisterValue>>();
+            Segments = new List<UserSegment>();
+            ProcedureSourceFiles = new Dictionary<Address, string>();
+            Patches = new Dictionary<Address, CodePatch>();
+            DebugTraceProcedures = new HashSet<string>();
+            BlockLabels = new Dictionary<string, string>();
+            ProcedureTemplates = new Dictionary<string, UserProcedureTemplate>();
+
+            ProcedureTemplates["default"] = new UserProcedureTemplate("default");
         }
 
         // 'Oracular' information provided by the user.
@@ -129,6 +132,9 @@ namespace Reko.Core
         /// For Reko debugging: procedures with these names will be traced.
         /// </summary>
         public HashSet<string> DebugTraceProcedures { get; set; }
+
+
+        public Dictionary<string, UserProcedureTemplate> ProcedureTemplates { get; set; }
     }
 
     public class Annotation

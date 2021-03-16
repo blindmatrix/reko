@@ -648,7 +648,7 @@ namespace Reko.Core
         {
             if (!User.Procedures.TryGetValue(address, out var up))
             {
-                up = new UserProcedure(address, name ?? NamingPolicy.ProcedureName(address))
+                up = new UserProcedure(address, name ?? NamingPolicy.ProcedureName(address), User.ProcedureTemplates["default"])
                 {
                     Decompile = decompile,
                 };

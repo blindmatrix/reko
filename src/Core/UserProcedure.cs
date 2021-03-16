@@ -29,12 +29,13 @@ namespace Reko.Core
     {
         public const int NoOrdinal = -1;
         
-        public UserProcedure(Address address, string name)
+        public UserProcedure(Address address, string name, UserProcedureTemplate template)
         {
             Address = address;
             Name = name;
             Assume = new List<RegisterValue_v2>();
             Characteristics = new ProcedureCharacteristics();
+            Template = template;
         }
 
         public Address Address { get; set; }
@@ -54,5 +55,7 @@ namespace Reko.Core
         public SerializedSignature? Signature { get; set; }
 
         public ProcedureCharacteristics Characteristics { get; set; }
+
+        public UserProcedureTemplate Template { get; set; }
     }
 }

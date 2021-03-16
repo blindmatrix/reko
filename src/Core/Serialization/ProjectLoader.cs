@@ -33,6 +33,7 @@ using Reko.Core.Types;
 using Reko.Core.Expressions;
 using System.Globalization;
 using Reko.Core.Memory;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Reko.Core.Serialization
 {
@@ -329,6 +330,7 @@ namespace Reko.Core.Serialization
                 user.Environment = sUser.PlatformOptions.Name;
                 program.Platform.LoadUserOptions(XmlOptions.LoadIntoDictionary(sUser.PlatformOptions.Options, StringComparer.OrdinalIgnoreCase));
             }
+            user.ProcedureTemplates = LoadProcedureTemplates(sUser.ProcedureTemplates);
             if (sUser.Procedures != null)
             {
                 user.Procedures = sUser.Procedures
@@ -420,6 +422,41 @@ namespace Reko.Core.Serialization
             program.User.AggressiveBranchRemoval = sUser.AggressiveBranchRemoval;
         }
 
+        private Dictionary<string, UserProcedureTemplate> LoadProcedureTemplates(List<ProcedureTemplate_v1> templates)
+        {
+            var userTemplates = new Dictionary<string, UserProcedureTemplate>(templates.Count + 2);
+
+            foreach(var template in templates)
+            {
+                string name = string.IsNullOrWhiteSpace(template.Name) ? "default" : template.Name;
+
+                if (userTemplates.ContainsKey(name))
+                    throw new ApplicationException(string.Format("Duplicate ProcedureTemplate entry for \"{0}\"", name));
+
+                var userTemplate = new UserProcedureTemplate(name);
+
+                foreach (var sRegValue in template.EntryRegisterValues)
+                {
+                    if (!TryLoadRegisterValue(sRegValue, out var userReg))
+                    {
+                        listener.Warn(string.Format("Unable to load register assumptions for register \"{0}\" for procedure template \"{1}\"", sRegValue.Register ?? "<unknown>", template.Name ?? "<unknown>"));
+                        continue;
+                    }
+
+                    userTemplate.ProcedureEntryRegisterValues.Add(userReg);
+                }
+
+                userTemplates[name] = userTemplate;
+            }
+
+            if (!userTemplates.ContainsKey("default"))
+                userTemplates["default"] = new UserProcedureTemplate("default");
+            if (!userTemplates.ContainsKey("none"))
+                userTemplates["none"] = new UserProcedureTemplate("none");
+
+            return userTemplates;
+        }
+
         private Annotation LoadAnnotation(Annotation_v3 annotation)
         {
             arch!.TryParseAddress(annotation.Address, out var address);
@@ -429,15 +466,6 @@ namespace Reko.Core.Serialization
         private SortedList<Address, List<UserRegisterValue>> LoadRegisterValues(
             RegisterValue_v2[] sRegValues)
         {
-            Storage? GetStorage(string? name)
-            {
-                if (name is null)
-                    return null;
-                if (platform.Architecture.TryGetRegister(name, out var reg))
-                    return reg;
-                return platform.Architecture.GetFlagGroup(name);
-            }
-
             var allLists = new SortedList<Address, List<UserRegisterValue>>();
             foreach (var sRegValue in sRegValues)
             {
@@ -448,17 +476,41 @@ namespace Reko.Core.Serialization
                         list = new List<UserRegisterValue>();
                         allLists.Add(addr, list);
                     }
-                    var stg = GetStorage(sRegValue.Register);
-                    if (stg != null)
+                    if (TryLoadRegisterValue(sRegValue, out var userReg))
                     {
-                        var c = sRegValue.Value != "*"
-                            ? Constant.Create(stg.DataType, Convert.ToUInt64(sRegValue.Value, 16))
-                            : Constant.Invalid;
-                        list.Add(new UserRegisterValue(stg, c));
+                        list.Add(userReg);
                     }
                 }
             }
             return allLists;
+        }
+
+        private bool TryLoadRegisterValue(RegisterValue_v2 sRegValue, [NotNullWhen(true)] out UserRegisterValue? userRegValue)
+        {
+            Storage? GetStorage(string? name)
+            {
+                if (name is null)
+                    return null;
+                if (platform!.Architecture.TryGetRegister(name, out var reg))
+                    return reg;
+                return platform.Architecture.GetFlagGroup(name);
+            }
+
+            var stg = GetStorage(sRegValue.Register);
+
+            if (stg == null)
+            {
+                userRegValue = null;
+                return false;
+            }
+
+            var c = sRegValue.Value != "*"
+                ? Constant.Create(stg.DataType, Convert.ToUInt64(sRegValue.Value, 16))
+                : Constant.Invalid;
+
+            userRegValue = new UserRegisterValue(stg, c);
+
+            return true;
         }
 
         private ImageMapVectorTable? LoadJumpTable_v4(JumpTable_v4 sTable)
@@ -615,8 +667,18 @@ namespace Reko.Core.Serialization
             }
 
             string name = sup.Name ?? NamingPolicy.Instance.ProcedureName(addr);
+            string templateName = string.IsNullOrWhiteSpace(sup.Template) ? "default" : sup.Template;
 
-            var up = new UserProcedure(addr, name)
+            if (!program.User.ProcedureTemplates.TryGetValue(templateName, out var template))
+            {
+                listener.Warn(string.Format(
+                    "Unable to find procedure template \"{0}\" for procedure \"{1}\" ({2}), falling back to default.",
+                    templateName, name, sup.Address?.ToString() ?? "<invalid address>"
+                    ));
+                template = program.User.ProcedureTemplates["default"];
+            }
+
+            var up = new UserProcedure(addr, name, template)
             {
                 Ordinal = sup.Ordinal,
                 Signature = sup.Signature,

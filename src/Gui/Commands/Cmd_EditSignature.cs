@@ -46,7 +46,7 @@ namespace Reko.Gui.Commands
             var dlgFactory = Services.RequireService<IDialogFactory>();
             var uiSvc = Services.RequireService<IDecompilerShellUiService>();
             if (!program.User.Procedures.TryGetValue(address, out var proc))
-                proc = new UserProcedure(address, procedure.Name);
+                proc = new UserProcedure(address, procedure.Name, program.User.ProcedureTemplates["default"]);
             using (IProcedureDialog dlg = dlgFactory.CreateProcedureDialog(program, proc))
             {
                 if (DialogResult.OK == uiSvc.ShowModalDialog(dlg))

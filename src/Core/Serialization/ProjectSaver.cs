@@ -97,6 +97,7 @@ namespace Reko.Core.Serialization
                     ExtractResources = program.User.ExtractResources,
                     OutputFilePolicy = program.User.OutputFilePolicy,
                     AggressiveBranchRemoval = program.User.AggressiveBranchRemoval,
+                    ProcedureTemplates = SerializeProcedureTemplates(program.User.ProcedureTemplates),
                 },
                 DisassemblyDirectory =  ConvertToProjectRelativePath(projectAbsPath, program.DisassemblyDirectory),
                 SourceDirectory =       ConvertToProjectRelativePath(projectAbsPath, program.SourceDirectory),
@@ -118,10 +119,45 @@ namespace Reko.Core.Serialization
                 Assume = up.Assume.Count != 0 ? up.Assume.ToArray() : null,
                 CSignature = up.CSignature,
                 OutputFile = up.OutputFile,
+                Template = up.Template.Name,
             };
 
             return sp;
         }
+
+        private List<ProcedureTemplate_v1> SerializeProcedureTemplates(Dictionary<string, UserProcedureTemplate> templates)
+        {
+            var sTemplates = new List<ProcedureTemplate_v1>(templates.Count);
+
+            foreach(var template in templates.Values)
+            {
+                if (template.Name == "default" || template.Name == "none")
+                {
+                    if (template.ProcedureEntryRegisterValues.Count == 0)
+                        continue;
+                }
+
+                var sRegisterValues = new List<RegisterValue_v2>(template.ProcedureEntryRegisterValues.Count);
+
+                foreach (var reg in template.ProcedureEntryRegisterValues)
+                {
+                    var srv = SerializeRegisterValue(null, reg);
+
+                    if (srv == null)
+                        continue;
+
+                    sRegisterValues.Add(srv);
+                }
+
+                sTemplates.Add(new ProcedureTemplate_v1 { 
+                    Name = template.Name,
+                    EntryRegisterValues = sRegisterValues,
+                });;
+            }
+
+            return sTemplates;
+        }
+
 
         private ProcedureCharacteristics? SerializeProcedureCharacteristics(ProcedureCharacteristics? pc)
         {
@@ -139,22 +175,33 @@ namespace Reko.Core.Serialization
                 var sAddr = de.Key.ToString();
                 foreach (var rv in de.Value)
                 {
-                    var reg = rv.Register;
-                    var regValue = rv.Value;
-                    if (reg is null || regValue is null)
+                    var srv = SerializeRegisterValue(de.Key, rv);
+
+                    if (srv == null)
                         continue;
-                    var value = regValue.IsValid
-                        ? string.Format($"{{0:X{reg.DataType.Size * 2}}}", regValue.ToUInt64())
-                        : "*";
-                    sRegValues.Add(new RegisterValue_v2
-                    {
-                        Address = sAddr,
-                        Register = reg.Name,
-                        Value = value,
-                    });
+
+                    sRegValues.Add(srv);
                 }
             }
             return sRegValues.ToArray();
+        }
+
+        private RegisterValue_v2? SerializeRegisterValue(Address? address, UserRegisterValue rv)
+        {
+            var reg = rv.Register;
+            var regValue = rv.Value;
+            if (reg is null || regValue is null)
+                return null;
+            var value = regValue.IsValid
+                ? string.Format($"{{0:X{reg.DataType.Size * 2}}}", regValue.ToUInt64())
+                : "*";
+
+            return new RegisterValue_v2
+            {
+                Address = address?.ToString(),
+                Register = reg.Name,
+                Value = value,
+            };
         }
 
         private SerializedCall_v1? SerializeUserCall(Program program, UserCallData? uc)

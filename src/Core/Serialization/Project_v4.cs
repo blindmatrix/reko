@@ -117,6 +117,7 @@ namespace Reko.Core.Serialization
             IndirectJumps = new List<IndirectJump_v4>();
             Segments = new List<Segment_v4>();
             BlockLabels = new List<BlockLabel_v1>();
+            ProcedureTemplates = new List<ProcedureTemplate_v1>();
         }
 
         [XmlElement("address")]
@@ -186,6 +187,9 @@ namespace Reko.Core.Serialization
         [XmlElement("aggressiveBlockRemoval")]
         [DefaultValue(false)]
         public bool AggressiveBranchRemoval;
+
+        [XmlElement("procedureTemplate")]
+        public List<ProcedureTemplate_v1> ProcedureTemplates;
     }
 
     public class PlatformOptions_v4

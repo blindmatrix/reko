@@ -66,7 +66,7 @@ namespace Reko.Scanning
             }
             if (noDecompiledProcs.TryGetValue(addr, out parsedProc))
                 return true;
-            parsedProc = new UserProcedure(addr, sProc.Name)
+            parsedProc = new UserProcedure(addr, sProc.Name, Program.User.ProcedureTemplates["default"])
             {
                 Name = sProc.Name,
                 Signature = new SerializedSignature

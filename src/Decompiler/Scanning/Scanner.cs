@@ -604,6 +604,22 @@ namespace Reko.Scanning
             var sp = proc.Frame.EnsureRegister(proc.Architecture.StackRegister);
             bb.Assign(sp, proc.Frame.FramePointer);
             Program.Platform.InjectProcedureEntryStatements(proc, addr, bb);
+
+            var template = GetUserProcedureTemplateForAddress(addr);
+
+            foreach (var assume in template.ProcedureEntryRegisterValues)
+            {
+                var reg = proc.Frame.EnsureIdentifier(assume.Register!);
+                bb.Assign(reg, assume.Value!);
+            }
+        }
+
+        private UserProcedureTemplate GetUserProcedureTemplateForAddress(Address address)
+        {
+            if (Program.User.Procedures.TryGetValue(address, out var userProc))
+                return userProc.Template;
+            else
+                return Program.User.ProcedureTemplates["default"];
         }
 
         public void EnqueueUserGlobalData(Address addr, DataType dt, string? name)

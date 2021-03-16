@@ -93,6 +93,11 @@ namespace Reko.Core.Serialization
         /// </summary>
         [XmlElement("OutputFile")]
         public string? OutputFile;
+
+        [XmlAttribute("template")]
+        public string? Template = "default";
+
+        public bool TemplateSpecified { get => Template != "default"; }
     }
 
     public class RegisterValue_v2
