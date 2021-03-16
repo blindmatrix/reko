@@ -98,6 +98,8 @@ namespace Reko.UnitTests.Core.Serialization
                 .Returns(true);
         }
 
+        private UserProcedureTemplate DefaultProcedureTemplate => new UserProcedureTemplate("default");
+
         [Test]
         public void SudWrite()
         {
@@ -205,7 +207,7 @@ namespace Reko.UnitTests.Core.Serialization
                             {
                                 {
                                     Address.SegPtr(0x1000, 0x10),
-                                    new UserProcedure(Address.SegPtr(0x1000, 0x10), "foo")
+                                    new UserProcedure(Address.SegPtr(0x1000, 0x10), "foo", DefaultProcedureTemplate)
                                     {
                                         Signature = new SerializedSignature
                                         {

@@ -78,7 +78,7 @@ namespace Reko.UnitTests.Analysis
             {
                 program.User.Procedures.Add(
                     proc.Key,
-                    new UserProcedure(proc.Key, proc.Value.Name)
+                    new UserProcedure(proc.Key, proc.Value.Name, DefaultProcedureTemplate)
                     {
                         CSignature = this.CSignature
                     });
@@ -89,6 +89,7 @@ namespace Reko.UnitTests.Analysis
                 usb.BuildSignatures(new FakeDecompilerEventListener());
             }
         }
+        private UserProcedureTemplate DefaultProcedureTemplate => new UserProcedureTemplate("default");
 
         protected void Given_CSignature(string CSignature)
         {

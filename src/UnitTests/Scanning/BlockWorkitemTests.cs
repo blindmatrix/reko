@@ -244,6 +244,7 @@ namespace Reko.UnitTests.Scanning
                 Assert.AreEqual(expected, sw.ToString());
             }
         }
+        private UserProcedureTemplate DefaultProcedureTemplate => new UserProcedureTemplate("default");
 
         [Test]
         public void Bwi_RewriteReturn()
@@ -841,7 +842,7 @@ testProc_exit:
 
             program.User.Procedures.Add(
                 addrCallee,
-                new UserProcedure(addrCallee, NamingPolicy.Instance.ProcedureName(addrCallee))
+                new UserProcedure(addrCallee, NamingPolicy.Instance.ProcedureName(addrCallee), DefaultProcedureTemplate)
                 {
                     CSignature = "int testFn(char * str, float f)"
                 });

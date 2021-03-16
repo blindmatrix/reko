@@ -86,7 +86,7 @@ namespace Reko.UnitTests.Core.Output
         private void Given_UserProcedure(uint uAddr, string procName, string placement)
         {
             var addr = Address.Ptr32(uAddr);
-            var uProc = new UserProcedure(addr, procName)
+            var uProc = new UserProcedure(addr, procName, DefaultProcedureTemplate)
             {
                 OutputFile = placement
             };
@@ -106,6 +106,8 @@ namespace Reko.UnitTests.Core.Output
         {
             program.GlobalFields.Fields.Add(uOffset, dt);
         }
+
+        private UserProcedureTemplate DefaultProcedureTemplate => new UserProcedureTemplate("default");
 
         [Test]
         public void Segfp_Single_Segment()

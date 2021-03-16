@@ -81,13 +81,15 @@ namespace Reko.UnitTests.Analysis
 
         private void Given_Signature(Address addr, string procName, SerializedSignature ssig)
         {
-            userSigs[addr] = new UserProcedure(addr, procName)
+            userSigs[addr] = new UserProcedure(addr, procName, DefaultProcedureTemplate)
             {
                  Signature = ssig,
             };
         }
 
-		[Test]
+        private UserProcedureTemplate DefaultProcedureTemplate => new UserProcedureTemplate("default");
+
+        [Test]
         [Category(Categories.IntegrationTests)]
 		public void RlDataConstraint()
 		{

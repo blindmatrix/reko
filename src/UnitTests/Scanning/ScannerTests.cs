@@ -260,6 +260,7 @@ namespace Reko.UnitTests.Scanning
             };
             return new DataScanner(program, sr,  eventListener);
         }
+        private UserProcedureTemplate DefaultProcedureTemplate => new UserProcedureTemplate("default");
 
         [Test]
         public void Scanner_SplitBlock()
@@ -606,7 +607,7 @@ fn00001000_exit:
             var address = Address.Ptr32(0x2000);
             program.User.Procedures.Add(
                 address,
-                new UserProcedure(address, "ndProc")
+                new UserProcedure(address, "ndProc", DefaultProcedureTemplate)
                 {
                     CSignature = "int ndProc(double dVal)",
                     Decompile = false,
@@ -630,7 +631,7 @@ fn00001000_exit:
             var address = Address.Ptr32(0x2000);
             program.User.Procedures.Add(
                 address,
-                new UserProcedure(address, NamingPolicy.Instance.ProcedureName(address))
+                new UserProcedure(address, NamingPolicy.Instance.ProcedureName(address), DefaultProcedureTemplate)
                 {
                     CSignature = null,
                     Decompile = false,
@@ -653,13 +654,13 @@ fn00001000_exit:
             var sc = CreateScanner(program);
             sc.EnqueueUserProcedure(
                 program.Architecture,
-                new UserProcedure(Address.Ptr32(0x1000), "proc1")
+                new UserProcedure(Address.Ptr32(0x1000), "proc1", DefaultProcedureTemplate)
                 {
                     Decompile = false
                 });
             sc.EnqueueUserProcedure(
                 program.Architecture,
-                new UserProcedure(Address.Ptr32(0x1020), "proc2")
+                new UserProcedure(Address.Ptr32(0x1020), "proc2", DefaultProcedureTemplate)
                 );
             sc.ScanImage();
             Assert.AreEqual(1, program.Procedures.Count);
@@ -673,7 +674,7 @@ fn00001000_exit:
             var address = Address.Ptr32(0x12314);
             program.User.Procedures.Add(
                 address,
-                new UserProcedure(address, NamingPolicy.Instance.ProcedureName(address))
+                new UserProcedure(address, NamingPolicy.Instance.ProcedureName(address), DefaultProcedureTemplate)
                 {
                     Decompile = false,
                 }
@@ -700,7 +701,7 @@ fn00001000_exit:
             var address = Address.Ptr32(0x12314);
             program.User.Procedures.Add(
                 address,
-                new UserProcedure(address, NamingPolicy.Instance.ProcedureName(address))
+                new UserProcedure(address, NamingPolicy.Instance.ProcedureName(address), DefaultProcedureTemplate)
                 {
                     Decompile = false,
                 }
@@ -731,7 +732,7 @@ fn00001000_exit:
             var address = Address.Ptr32(0x12314);
             program.User.Procedures.Add(
                 address,
-                new UserProcedure(address, NamingPolicy.Instance.ProcedureName(address))
+                new UserProcedure(address, NamingPolicy.Instance.ProcedureName(address), DefaultProcedureTemplate)
                 {
                     Decompile = false,
                 }
@@ -854,7 +855,7 @@ fn00001200_exit:
             var scanner = CreateScanner(0x1000, 0x2000);
 
             var address = Address.Ptr32(0x1000);
-            program.User.Procedures.Add(Address.Ptr32(0x1000), new UserProcedure(address, NamingPolicy.Instance.ProcedureName(address))
+            program.User.Procedures.Add(Address.Ptr32(0x1000), new UserProcedure(address, NamingPolicy.Instance.ProcedureName(address), DefaultProcedureTemplate)
             {
                 Assume = {
                      new RegisterValue_v2 { Register="r1", Value="0DC0" }
@@ -1048,7 +1049,7 @@ fn00001200_exit:
             var address = Address.Ptr32(0x00100010);
             program.User.Procedures.Add(
                 address,
-                new UserProcedure(address, NamingPolicy.Instance.ProcedureName(address))
+                new UserProcedure(address, NamingPolicy.Instance.ProcedureName(address), DefaultProcedureTemplate)
                 {
                     CSignature = "int foo(char * a, float b)"
                 });

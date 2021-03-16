@@ -103,6 +103,8 @@ namespace Reko.UnitTests.Analysis
             }
         }
 
+        private UserProcedureTemplate DefaultProcedureTemplate => new UserProcedureTemplate("default");
+
         [Test]
         [Category(Categories.UnitTests)]
         public void Dfa2_Simple()
@@ -228,7 +230,7 @@ test_exit:
             var arch = new X86ArchitectureFlat32(new ServiceContainer(), "x86-protected-32",  new Dictionary<string, object>());
             var pb = new ProgramBuilder(arch);
             var test = pb.Add(
-                new UserProcedure(pb.NextAddress(), "test")
+                new UserProcedure(pb.NextAddress(), "test", DefaultProcedureTemplate)
                 {
                     CSignature = "void test(int a, int b)"
                 },

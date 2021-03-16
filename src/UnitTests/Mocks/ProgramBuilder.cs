@@ -63,7 +63,9 @@ namespace Reko.UnitTests.Mocks
             };
         }
 
-		public Program Program { get; set; }
+        private UserProcedureTemplate DefaultProcedureTemplate => new UserProcedureTemplate("default");
+
+        public Program Program { get; set; }
 
         public void Add(Procedure proc, UserProcedure? userProc = null)
         {
@@ -119,7 +121,7 @@ namespace Reko.UnitTests.Mocks
 
         public Procedure Add(string procName, Action<ProcedureBuilder> testCodeBuilder)
         {
-            return Add(new UserProcedure(NextAddress(), procName), testCodeBuilder);
+            return Add(new UserProcedure(NextAddress(), procName, DefaultProcedureTemplate), testCodeBuilder);
         }
 
         public Procedure Add(UserProcedure userProc, Action<ProcedureBuilder> testCodeBuilder)

@@ -56,7 +56,7 @@ namespace Reko.UnitTests.Analysis
         private void Given_UserSignature(uint address, string str)
         {
             var addr = Address.Ptr32(address);
-            program.User.Procedures.Add(addr, new UserProcedure(addr, NamingPolicy.Instance.ProcedureName(addr))
+            program.User.Procedures.Add(addr, new UserProcedure(addr, NamingPolicy.Instance.ProcedureName(addr), DefaultProcedureTemplate)
             {
                  CSignature = str
             });
@@ -65,7 +65,7 @@ namespace Reko.UnitTests.Analysis
         private void Given_UserName(uint address, string name)
         {
             var addr = Address.Ptr32(address);
-            program.User.Procedures.Add(addr, new UserProcedure(addr, name));
+            program.User.Procedures.Add(addr, new UserProcedure(addr, name, DefaultProcedureTemplate));
         }
 
         private void Given_UserProcDecompileFlag(uint address, bool decompile)
@@ -86,6 +86,8 @@ namespace Reko.UnitTests.Analysis
             this.proc = Procedure.Create(program.Architecture, "fnTest", Address.Ptr32(address), new Frame(PrimitiveType.Ptr32));
             this.program.Procedures[Address.Ptr32(address)] = this.proc;
         }
+
+        private UserProcedureTemplate DefaultProcedureTemplate => new UserProcedureTemplate("default");
 
         [Test(Description = "Empty user signature shouldn't affect procedure signature")]
         public void Usb_EmptyUserSignature()

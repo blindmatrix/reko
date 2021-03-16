@@ -220,12 +220,14 @@ namespace Reko.UnitTests.Analysis
         {
             program.User.Procedures.Add(
                 address,
-                new UserProcedure(address, name)
+                new UserProcedure(address, name, DefaultProcedureTemplate)
                 {
                     Decompile = true,
                     Signature = sSig,
                 });
         }
+
+        private UserProcedureTemplate DefaultProcedureTemplate => new UserProcedureTemplate("default");
 
         [Test]
         [Category(Categories.IntegrationTests)]
