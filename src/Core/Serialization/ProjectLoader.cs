@@ -454,11 +454,7 @@ namespace Reko.Core.Serialization
                         var c = sRegValue.Value != "*"
                             ? Constant.Create(stg.DataType, Convert.ToUInt64(sRegValue.Value, 16))
                             : Constant.Invalid;
-                        list.Add(new UserRegisterValue
-                        {
-                            Register = stg,
-                            Value = c
-                        });
+                        list.Add(new UserRegisterValue(stg, c));
                     }
                 }
             }
